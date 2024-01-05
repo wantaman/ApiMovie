@@ -10,6 +10,6 @@ class Movie(db.Model):
     running_time = db.Column(db.Integer, nullable=False)
     language = db.Column(db.String(100), nullable=False)
     genre = db.Column(db.String(100), nullable=False)
-    release_date = db.Column(db.DateTime, nullable=False),
+    release_date = db.Column(db.String(150), nullable=False),
     cast_detail = db.Column(db.String(255), nullable=False)
     

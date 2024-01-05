@@ -16,6 +16,7 @@ movie_model = api.model('Movie', {
     'running_time': fields.String(required=True, description='The movie running time'),
     'language': fields.String(required=True, description='The movie language'),
     'genre': fields.String(required=True, description='The movie genre'),
+    'release_date': fields.String(required=True, description='The movie release_date'),
     'cast_detail': fields.String(required=True, description='The movie cast')
 })
 
@@ -25,6 +26,7 @@ put_movie_parser.add_argument('title', type=str, required=True, help='Title is r
 put_movie_parser.add_argument('running_time', type=int, required=True, help='Running time is required')
 put_movie_parser.add_argument('language', type=str, required=True, help='Language is required')
 put_movie_parser.add_argument('genre', type=str, required=True, help='Genre is required')
+put_movie_parser.add_argument('release_date', type=str, required=True, help='Release_date is required')
 put_movie_parser.add_argument('cast_detail', type=str, required=True, help='Cast detail is required')
 
 @movies_ns.route('/')
@@ -38,6 +40,7 @@ class MoviesResource(Resource):
                         'running_time':movie.running_time,
                         'language': movie.language,
                         'genre':movie.genre,
+                        'release_date': movie.release_date,
                         'cast_detail': movie.cast_detail}
                         for movie in movies]
         except Exception as e:
@@ -47,7 +50,7 @@ class MoviesResource(Resource):
     def post(self):
         try:
             data = put_movie_parser.parse_args()
-            for field in ['title', 'running_time', 'language', 'genre', 'cast_detail']:
+            for field in ['title', 'running_time', 'language', 'genre','release_date' ,'cast_detail']:
                 if not data[field]:
                     return {'error': f'{field} is required'}, 400
                 
@@ -56,6 +59,7 @@ class MoviesResource(Resource):
                 running_time=data['running_time'],
                 language=data['language'],
                 genre=data['genre'],
+                release_date= data['release_date'],
                 cast_detail=data['cast_detail']
             )
             db.session.add(new_movie)
@@ -66,6 +70,7 @@ class MoviesResource(Resource):
                         'running_time':new_movie.running_time,
                         'language': new_movie.language,
                         'genre':new_movie.genre,
+                        'release_date':new_movie.release_date,
                         'cast_detail': new_movie.cast_detail}, 201
             
         except Exception as e:
@@ -90,6 +95,7 @@ class MovieResource(Resource):
             movie.running_time = data['running_time']
             movie.language = data['language']
             movie.genre = data['genre']
+            movie.release_date = data['release_date']
             movie.cast_detail = data['cast_detail']
             db.session.commit()
             return marshal(movie, movie_model)
