@@ -11,6 +11,8 @@ db.init_app(app)
 api = Api(app, version='1.0', title='Movie Database System', description='API for managing movies')
 movies_ns = api.namespace("movies", path='/movies', description="Operations related to movies")
 
+# search_ns = api.namespace("movies", path='/movies', description="Operations related to movies")
+
 movie_model = api.model('Movie', {
     'title': fields.String(required=True, description='The movie title'),
     'running_time': fields.String(required=True, description='The movie running time'),
@@ -29,8 +31,10 @@ put_movie_parser.add_argument('genre', type=str, required=True, help='Genre is r
 put_movie_parser.add_argument('release_date', type=str, required=True, help='Release_date is required')
 put_movie_parser.add_argument('cast_detail', type=str, required=True, help='Cast detail is required')
 
+
+# create and get all
 @movies_ns.route('/')
-class MoviesResource(Resource):
+class MoviesResource(Resource):  
     def get(self):
         try:
             movies = db.session.query(Movie).all()
@@ -76,7 +80,8 @@ class MoviesResource(Resource):
         except Exception as e:
             db.session.rollback()  
             return {'error': f'Error adding movie: {str(e)}'}, 500
-        
+
+# update, delete and get user by id   
 @movies_ns.route('/<int:movie_id>')
 class MovieResource(Resource):
     def get(self, movie_id):
@@ -112,6 +117,28 @@ class MovieResource(Resource):
             return {'error': f'Error deleting movie: {str(e)}'}
 
 
+
+# search 
+@movies_ns.route('/filter/<string:movie_title>')
+class Search(Resource):
+     def get(self, movie_title):
+        try:
+            movie = Movie.query.filter(Movie.title.ilike(f'%{movie_title}%')).all()
+            if movie:
+                return [{   
+                       'id': movies.show_id,
+                        'title':movies.title,
+                        'running_time':movies.running_time,
+                        'language': movies.language,
+                        'genre':movies.genre,
+                        'release_date': movies.release_date,
+                        'cast_detail': movies.cast_detail}
+                        for movies in movie]
+            else:
+                return {'message': f'Movie with title "{movie_title}" not found'}
+        except Exception as e:
+            return {'error': f'Error fetching movie: {str(e)}'}
+
 if __name__ == '__main__':
     with app.app_context():
         try:
@@ -122,3 +149,6 @@ if __name__ == '__main__':
             print(f"Error creating database tables: {str(e)}")
 
     app.run(host='127.0.0.1', port=5500)
+
+
+    
